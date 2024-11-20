@@ -12,7 +12,7 @@ const userDetails = async (req, res)=>{
     res.status(200).json(user);    
 
    } catch (error) {
-        res.status(404).json({message: "Cannot fetch data ❌"})
+        res.status(500).json({message: "Server Error🌍!!! Cannot fetch data ❌"})
         console.log("somthing went wrong fetching data....😒")
    }
 }
