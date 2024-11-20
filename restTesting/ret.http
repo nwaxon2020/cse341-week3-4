@@ -1,0 +1,32 @@
+GET http://localhost:5000/user
+
+###
+
+GET http://localhost:5000/user/673dc629a091bb83922b0ffd
+
+###
+
+POST http://localhost:5000/user
+Content-Type: application/json
+
+{
+    "userName": "Vera",
+    "email": "veradnm@logMe.com",
+    "occupation": "Teacher"
+}
+
+###
+
+PUT http://localhost:5000/user/673dc629a091bb83922b0ffd
+Content-Type: application/json
+
+{
+    "userName": "Prince-Alma",
+    "email": "None",
+    "occupation": "Student"
+}
+
+###
+
+DELETE  http://localhost:5000/user/673dc29e7b17a69b89ce1438
+Content-Type: application/json
