@@ -10,20 +10,29 @@ POST http://localhost:5000/user
 Content-Type: application/json
 
 {
-    "userName": "Vera",
-    "email": "veradnm@logMe.com",
-    "occupation": "Teacher"
+    "userName": "Handson",
+    "email": "hanson@gmail.com",
+    "occupation": "student",
+    "password": "handson"
 }
 
 ###
 
-PUT http://localhost:5000/user/673dc629a091bb83922b0ffd
+POST http://localhost:5000/login
 Content-Type: application/json
 
 {
-    "userName": "Prince-Alma",
-    "email": "None",
-    "occupation": "Student"
+    "email": "princenwachukwu308@yahoo.com",
+    "password": "handson"
+}
+
+###
+
+PUT http://localhost:5000/user/673dc345e49f2a9f494a1fa9
+Content-Type: application/json
+
+{
+    "email": "princenwachukwu308@yahoo.com"
 }
 
 ###

@@ -1,5 +1,64 @@
 const mongodb = require("../data/databass");
 const {ObjectId} = require("mongodb");
+const {check, validationResult} = require("express-validator");
+
+const validateNewUser = [
+    check("userName")
+    .notEmpty()
+    .isLength({min: 3})
+    .withMessage("uerName feild can not be emptyor less than 3 characters")
+    .isString()
+    .withMessage("Only letters alowed"),
+
+    check("email")
+    .isEmail()
+    .withMessage("please enter a valid email address")
+    .notEmpty()
+    .withMessage("Email field cannot be empty")
+    .bail()
+    .custom(async (email)=>{
+        const db = await mongodb.userDataBass();
+        const user = await db.collection("contacts").findOne({email: email});
+        if(user){
+            throw new Error("User already Exist....Please use a diffrent email address or logIn");
+            
+        }
+    }),
+
+    check("occupation")
+    .notEmpty()
+    .withMessage("Occupation field cannot be empty"),
+
+    check("password")
+    .isLength({min: 3})
+    .withMessage("Password must be above 3 charcters"),
+
+    
+]
+
+const validateLogIn = [
+    check("email").isEmail().notEmpty().withMessage("Invalid email address")
+    .bail()
+    .custom(async(email)=>{
+        const db = await mongodb.userDataBass();
+        const user = await db.collection("contacts").findOne({email: email})
+
+        if(!user){
+            throw new Error("User not found....please enter a valid email or register an account");
+        }
+    }),
+
+    check("password").notEmpty().isLength({min: 3}).withMessage("Incorrect password")
+    .bail()
+    .custom(async(password)=>{
+        const db = await mongodb.userDataBass();
+        const user = await db.collection("contacts").findOne({password: password})
+
+        if(!user){
+            throw new Error("Invalid Password....please enter a valid password or register an account");
+        }
+    }),
+]
 
 // Get all users
 const userDetails = async (req, res)=>{
@@ -19,15 +78,28 @@ const userDetails = async (req, res)=>{
 
 // Get a single users
 const singleUserDetils = async (req, res)=>{
+    
     try {
-
-        if(!ObjectId.isValid(req.params.id)){
-            return res.status(401).send("Contact not found!!!❌")
+        const err = validationResult(req);
+        if(!err.isEmpty()){
+            const allError = err.array().map((errs)=> errs.msg);
+            return res.status(401).send({error: allError});
         }
 
+        // if(!ObjectId.isValid(req.params.id)){
+        //     return res.status(401).send("Contact not found!!!❌")
+        // }
+
+        const {email, password} = req.body;
+
         const result = await mongodb.userDataBass();
-        const user = await result.collection("contacts").findOne({_id: new ObjectId(String(req.params.id))});
- 
+        const user = await result.collection("contacts").findOne(/*{_id: new ObjectId(String(req.params.id))}*/ {email: email, password: password});
+        
+        if(!user){
+            return res.status(401).send({error: "Invalid username or password"});
+        }
+
+
         res.setHeader("Content-Type", "application/json");
         res.status(200).json(user);    
     
@@ -40,7 +112,14 @@ const singleUserDetils = async (req, res)=>{
 // Create a new user
 const createNewUser = async (req, res)=>{
     try {
-        const newUser = req.body
+
+        const err = validationResult(req);
+        if(!err.isEmpty()){
+            const allError = err.array().map((errs) => errs.msg);
+            return res.status(401).send({error: allError});
+        }
+
+        const newUser = req.body;
         const result = await mongodb.userDataBass();
         const db = await result.collection("contacts").insertOne(newUser);
     
@@ -110,5 +189,7 @@ module.exports = {
     createNewUser,
     singleUserDetils,
     updateUser,
-    deleteUser
+    deleteUser,
+    validateNewUser,
+    validateLogIn
 };
