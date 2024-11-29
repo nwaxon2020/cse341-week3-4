@@ -2,7 +2,7 @@ GET http://localhost:5000/user
 
 ###
 
-GET http://localhost:5000/user/673dc629a091bb83922b0ffd
+GET http://localhost:5000/login/user/673dc3d26f0e7cad18846e8e
 
 ###
 
@@ -22,8 +22,8 @@ POST http://localhost:5000/login
 Content-Type: application/json
 
 {
-    "email": "princenwachukwu308@yahoo.com",
-    "password": "handson"
+    "email": "Mike_299@gmail.com",
+    "password": "mike"
 }
 
 ###

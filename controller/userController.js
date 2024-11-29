@@ -2,6 +2,7 @@ const mongodb = require("../data/databass");
 const {ObjectId} = require("mongodb");
 const {check, validationResult} = require("express-validator");
 
+// Account creation validation rules
 const validateNewUser = [
     check("userName")
     .notEmpty()
@@ -36,6 +37,7 @@ const validateNewUser = [
     
 ]
 
+// login validation rules
 const validateLogIn = [
     check("email").isEmail().notEmpty().withMessage("Invalid email address")
     .bail()
@@ -55,7 +57,7 @@ const validateLogIn = [
         const user = await db.collection("contacts").findOne({password: password})
 
         if(!user){
-            throw new Error("Invalid Password....please enter a valid password or register an account");
+            throw new Error("Incorrect Password....please enter a valid password");
         }
     }),
 ]
@@ -80,26 +82,51 @@ const userDetails = async (req, res)=>{
 const singleUserDetils = async (req, res)=>{
     
     try {
+        if(!ObjectId.isValid(req.params.id)){
+            return res.status(401).send("Contact not found!!!❌")
+        }
+
+        const result = await mongodb.userDataBass();
+        const user = await result.collection("contacts").findOne({_id: new ObjectId(String(req.params.id))});
+
+        if(!user){
+            return res.status(401).send({error: "User not found!!!!"});
+        }
+
+        if(!req.session.user || req.session.user._id.toString() !== user._id.toString()){
+            return res.status(401).send({msg: "Session Time-Out...Please log in"});
+        }
+
+        res.setHeader("Content-Type", "application/json");
+        res.status(200).json(user);    
+    
+       } catch (error) {
+            res.status(500).json({message: "Server Error🌍"})
+            console.log("somthing went wrong fetching data....😒")
+       }
+}
+
+
+// LogIn a single users
+const logInUser = async (req, res)=>{
+    
+    try {
         const err = validationResult(req);
         if(!err.isEmpty()){
             const allError = err.array().map((errs)=> errs.msg);
             return res.status(401).send({error: allError});
         }
 
-        // if(!ObjectId.isValid(req.params.id)){
-        //     return res.status(401).send("Contact not found!!!❌")
-        // }
-
         const {email, password} = req.body;
 
         const result = await mongodb.userDataBass();
-        const user = await result.collection("contacts").findOne(/*{_id: new ObjectId(String(req.params.id))}*/ {email: email, password: password});
-        
+        const user = await result.collection("contacts").findOne({email: email, password: password});
+     
         if(!user){
             return res.status(401).send({error: "Invalid username or password"});
         }
 
-
+        req.session.user = user;
         res.setHeader("Content-Type", "application/json");
         res.status(200).json(user);    
     
@@ -190,6 +217,7 @@ module.exports = {
     singleUserDetils,
     updateUser,
     deleteUser,
+    logInUser,
     validateNewUser,
     validateLogIn
 };

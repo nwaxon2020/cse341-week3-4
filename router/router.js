@@ -10,10 +10,10 @@ router.get("/", (req, res)=>{
 router.get("/user", getUser.userDetails);
 
 //Get a single user
-router.get("/user/:id", getUser.singleUserDetils);
+router.get("/login/user/:id", getUser.singleUserDetils);
 
 //LogIn a user with email and password
-router.post("/login/", getUser.validateLogIn, getUser.singleUserDetils);
+router.post("/login/", getUser.validateLogIn, getUser.logInUser);
 
 //create user new user
 router.post("/user", getUser.validateNewUser, getUser.createNewUser);

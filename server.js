@@ -3,11 +3,21 @@ const app = express();
 require("dotenv").config();
 const router = require("./router/router");
 const bodyParser = require("body-parser");
+const expressSession = require("express-session");
 
 //Body parser middleware
 app.use(bodyParser.urlencoded({extended: false}))// for HTML use only
 app.use(bodyParser.json());
 
+//Session middle ware
+app.use(expressSession({
+    secret: process.env.SESSION_SECRET,
+    saveUninitialized: false,
+    resave: false,
+    cookie: {
+        maxAge: 30000
+    }
+}))
 //Router middle ware
 app.use("/", router);
 
