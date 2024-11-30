@@ -17,7 +17,8 @@ app.use(expressSession({
     cookie: {
         maxAge: 30000
     }
-}))
+}));
+
 //Router middle ware
 app.use("/", router);
 
