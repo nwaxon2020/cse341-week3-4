@@ -4,6 +4,7 @@ require("dotenv").config();
 const router = require("./router/router");
 const bodyParser = require("body-parser");
 const expressSession = require("express-session");
+const mongoStore = require("connect-mongo")
 
 //Body parser middleware
 app.use(bodyParser.urlencoded({extended: false}))// for HTML use only
@@ -18,7 +19,11 @@ app.use(expressSession({
         httpOnly: true,
         maxAge: 30000,
         secure: process.env.NODE_ENV === 'production' ? true : false
-    }
+    },
+    store: mongoStore.create({
+        mongoUrl: process.env.MONGO_URI,
+        ttl: 20*60
+    })
 }));
 
 //Router middle ware
