@@ -17,12 +17,12 @@ app.use(expressSession({
     resave: false,
     cookie: {
         httpOnly: true,
-        maxAge: 30000,
+        maxAge: 20 * 60 * 1000,
         secure: process.env.NODE_ENV === 'production' ? true : false
     },
     store: mongoStore.create({
         mongoUrl: process.env.MONGO_URI,
-        ttl: 20*60
+        ttl: 20 * 60
     })
 }));
 
