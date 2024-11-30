@@ -1,6 +1,7 @@
 const mongodb = require("../data/databass");
 const {ObjectId} = require("mongodb");
 const {check, validationResult} = require("express-validator");
+const bcrypt = require("bcryptjs");
 
 // Account creation validation rules
 const validateNewUser = [
@@ -31,8 +32,11 @@ const validateNewUser = [
     .withMessage("Occupation field cannot be empty"),
 
     check("password")
+    .notEmpty()
     .isLength({min: 3})
-    .withMessage("Password must be above 3 charcters"),
+    .withMessage("Password must be above 3 charcters")
+    .matches(/^(?=.*\d)(?=.*[@#$%^&+=!]).*$/)
+    .withMessage("Password must contain special charcters & numbers"),
 
     
 ]
@@ -50,16 +54,12 @@ const validateLogIn = [
         }
     }),
 
-    check("password").notEmpty().isLength({min: 3}).withMessage("Incorrect password")
-    .bail()
-    .custom(async(password)=>{
-        const db = await mongodb.userDataBass();
-        const user = await db.collection("contacts").findOne({password: password})
+    check("password").notEmpty()
+    .isLength({min: 3})
+    .withMessage("Incorrect password")
+    .matches(/^(?=.*\d)(?=.*[@#$%^&+=!]).*$/)
+    .withMessage("Incorrect password Password must contain special charcters"),
 
-        if(!user){
-            throw new Error("Incorrect Password....please enter a valid password");
-        }
-    }),
 ]
 
 // Get all users
@@ -69,6 +69,9 @@ const userDetails = async (req, res)=>{
     const result = await mongodb.userDataBass();
     const user = await result.collection("contacts").find().toArray();
 
+    if(user.length === 0){
+        return res.send("No Item found")
+    }
     res.setHeader("Content-Type", "application/json");
     res.status(200).json(user);    
 
@@ -106,7 +109,6 @@ const singleUserDetils = async (req, res)=>{
        }
 }
 
-
 // LogIn a single users
 const logInUser = async (req, res)=>{
     
@@ -120,13 +122,21 @@ const logInUser = async (req, res)=>{
         const {email, password} = req.body;
 
         const result = await mongodb.userDataBass();
-        const user = await result.collection("contacts").findOne({email: email, password: password});
+        const user = await result.collection("contacts").findOne({email: email});
      
         if(!user){
-            return res.status(401).send({error: "Invalid username or password"});
+            return res.status(401).send({error: "Invalid email"});
         }
 
+        const checkPassword = await bcrypt.compare(password, user.password);
+
+        if(!checkPassword){
+            return res.status(401).send({error: "Invalid password"});
+        }
+
+        // setting the session
         req.session.user = user;
+
         res.setHeader("Content-Type", "application/json");
         res.status(200).json(user);    
     
@@ -144,9 +154,22 @@ const createNewUser = async (req, res)=>{
         if(!err.isEmpty()){
             const allError = err.array().map((errs) => errs.msg);
             return res.status(401).send({error: allError});
-        }
+        };
 
-        const newUser = req.body;
+        const {
+            userName,
+            email, 
+            occupation, 
+            password 
+        } = req.body;
+
+        const hashPassword = await bcrypt.hash(password, 13);
+
+        const newUser = {
+          ...req.body, 
+            password: hashPassword
+        };
+
         const result = await mongodb.userDataBass();
         const db = await result.collection("contacts").insertOne(newUser);
     
@@ -165,30 +188,50 @@ const createNewUser = async (req, res)=>{
 // Update a new user
 const updateUser = async (req, res)=>{
     try {
-
+         
         if(!ObjectId.isValid(req.params.id)){
             return res.status(401).send("No contact found!!! ❌")
-        }
-
-        const update = {$set: req.body};
+        };
 
         const result = await mongodb.userDataBass();
+
+        const user = await result.collection("contacts").findOne({_id: new ObjectId(String(req.params.id))});        
+
+        if(!user){
+            return res.status(401).send("User not found");
+        }
+
+        if(!req.session.user || req.session.user._id.toString() !== user._id.toString()){
+            return res.status(401).send({msg: "Sorry we could not get this contact...Log in to continue"});
+        }
+
+        let update = {$set: {...req.body}};
+
+        if(req.body.password){
+            const hashNewPassword = await bcrypt.hash(req.body.password, 13);
+            update.$set.password = hashNewPassword
+        };
+
         const db = await result.collection("contacts").updateOne({_id: new ObjectId(String(req.params.id))}, update);
     
         if(!db){
             res.status(401).send("Update failed ❌...please Try again");
-        }
+        };
         res.setHeader("Content-Type", "application/json");
-        res.status(201).send("Your contact was Updated successfully ✔");
+        res.status(200).send("Your contact was Updated successfully ✔");
           
        } catch (error) {
             res.status(500).json({message: "Server Error...🌍"})
             console.log("somthing went wrong fetching data....😒")
-       }
+       };
 }
 
 const deleteUser = async (req, res)=>{
     try {
+
+        if(!req.session.user){
+            return res.status(401).send({msg: "Please log in to continue..."})
+        }
 
         if(!ObjectId.isValid(req.params.id)){
             return res.status(401).send("No contact found!!! ❌")
@@ -197,7 +240,7 @@ const deleteUser = async (req, res)=>{
         const result = await mongodb.userDataBass();
         const db = await result.collection("contacts").deleteOne({_id: new ObjectId(String(req.params.id))});
     
-        if(!db.deletedCount > 0){
+        if(!db.deletedCount > 0 || !db){
             res.status(401).send("Delete failed ❌...please Try again");
         }
         res.setHeader("Content-Type", "application/json");

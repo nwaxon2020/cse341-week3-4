@@ -2,7 +2,7 @@ GET http://localhost:5000/user
 
 ###
 
-GET http://localhost:5000/login/user/673dc3d26f0e7cad18846e8e
+GET http://localhost:5000/login/user/674ae3c72dcf8531f0c82c49
 
 ###
 
@@ -10,10 +10,10 @@ POST http://localhost:5000/user
 Content-Type: application/json
 
 {
-    "userName": "Handson",
-    "email": "hanson@gmail.com",
-    "occupation": "student",
-    "password": "handson"
+    "userName": "Prince Nwachukwu",
+    "email": "princenwachukwu@gmail.com",
+    "occupation": "Business Man",
+    "password": "prince@32"
 }
 
 ###
@@ -22,20 +22,20 @@ POST http://localhost:5000/login
 Content-Type: application/json
 
 {
-    "email": "Mike_299@gmail.com",
-    "password": "mike"
+    "email": "hanson@gmail.com",
+    "password": "handson@3"
 }
 
 ###
 
-PUT http://localhost:5000/user/673dc345e49f2a9f494a1fa9
+PUT http://localhost:5000/login/user/674af502ddb3704e37baf36b
 Content-Type: application/json
 
 {
-    "email": "princenwachukwu308@yahoo.com"
+    "userName": "Hanson"
 }
 
 ###
 
-DELETE  http://localhost:5000/user/673dc29e7b17a69b89ce1438
+DELETE  http://localhost:5000/user/674aee3e2dcf8531f0c82c4a
 Content-Type: application/json

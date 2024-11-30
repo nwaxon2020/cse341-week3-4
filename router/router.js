@@ -19,7 +19,7 @@ router.post("/login/", getUser.validateLogIn, getUser.logInUser);
 router.post("/user", getUser.validateNewUser, getUser.createNewUser);
 
 // Update user
-router.put("/user/:id", getUser.updateUser);
+router.put("/login/user/:id",  getUser.validateNewUser, getUser.updateUser);
 
 // Delete user
 router.delete("/user/:id", getUser.deleteUser);
