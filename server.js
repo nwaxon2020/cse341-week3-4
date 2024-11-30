@@ -15,7 +15,9 @@ app.use(expressSession({
     saveUninitialized: false,
     resave: false,
     cookie: {
-        maxAge: 30000
+        httpOnly: true,
+        maxAge: 30000,
+        secure: process.env.NODE_ENV === 'production' ? true : false
     }
 }));
 
