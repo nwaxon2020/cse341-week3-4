@@ -38,13 +38,13 @@ router.get(
     async (req, res) => {
         try {
             // Successful authentication
-            const user = req.user; // `req.user` contains the authenticated user
-            req.session.user = user; // Save user details to session for manual session handling
+            const user = req.user; 
+            req.session.user = user; 
 
-            res.redirect("/home"); // Redirect to home or wherever you want
+            res.redirect("/home"); 
         } catch (err) {
             console.error("Error logging in the user:", err);
-            res.redirect("/login"); // Redirect to login if something goes wrong
+            res.redirect("/login"); 
         }
     }
 );

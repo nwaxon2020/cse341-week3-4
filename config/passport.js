@@ -8,12 +8,12 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:5000/auth/google/callback", // Ensure this matches Google Console
+      callbackURL: "http://localhost:5000/auth/google/callback", 
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const db = await userDataBass(); // Get connected database
-        const usersCollection = db.collection("contacts"); // Replace "users" with your collection name
+        const db = await userDataBass(); 
+        const usersCollection = db.collection("contacts"); 
 
         // Find the user in the database
         let user = await usersCollection.findOne({ googleId: profile.id });
@@ -28,10 +28,10 @@ passport.use(
           };
 
           const result = await usersCollection.insertOne(newUser);
-          user = await usersCollection.findOne({ _id: result.insertedId }); // Fetch the created user
+          user = await usersCollection.findOne({ _id: result.insertedId }); 
         }
 
-        return done(null, user); // Pass user to serializeUser
+        return done(null, user); 
       } catch (err) {
         console.error("Error in Google Strategy:", err);
         return done(err, null);
@@ -41,7 +41,7 @@ passport.use(
 );
 
 passport.serializeUser((user, done) => {
-  done(null, user._id); // Use the user ID or any unique identifier
+  done(null, user._id);
 });
 
 passport.deserializeUser(async (id, done) => {
