@@ -28,14 +28,17 @@ Content-Type: application/json
 
 ###
 
-PUT http://localhost:5000/login/user/674af502ddb3704e37baf36b
+PUT http://localhost:5000/login/user/674ae3c72dcf8531f0c82c49
 Content-Type: application/json
 
 {
-    "userName": "Hanson"
+    "userName": "Hanson Chinaza"
 }
 
 ###
 
 DELETE  http://localhost:5000/user/674aee3e2dcf8531f0c82c4a
 Content-Type: application/json
+
+###
+GET http://localhost:5000/auth/google

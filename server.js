@@ -5,6 +5,13 @@ const router = require("./router/router");
 const bodyParser = require("body-parser");
 const expressSession = require("express-session");
 const mongoStore = require("connect-mongo")
+const passport = require("passport");
+require("./config/passport");
+
+//keep "http://localhost:5000/auth/google/callback"
+
+// Client ID 
+// Client secret 
 
 //Body parser middleware
 app.use(bodyParser.urlencoded({extended: false}))// for HTML use only
@@ -25,6 +32,9 @@ app.use(expressSession({
         ttl: 20 * 60
     })
 }));
+
+app.use(passport.initialize());
+app.use(passport.session())
 
 //Router middle ware
 app.use("/", router);
